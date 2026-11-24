@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vitality AI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#101010;color:white}
+header{padding:22px;background:#181818;border-bottom:1px solid #333;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:900;color:#ffd400}
+nav{display:flex;gap:10px;flex-wrap:wrap;padding:15px;background:#181818}
+button{cursor:pointer;border:0;border-radius:8px;padding:12px;background:#ffd400;color:#111;font-weight:bold}
+nav button{background:#292929;color:white}
+nav button.active{background:#ffd400;color:#111}
+main{padding:22px;max-width:1100px;margin:auto}
+h1{font-size:27px;margin-bottom:10px}
+.sub{color:#aaa;margin-bottom:25px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin:22px 0}
+.card{background:#1d1d1d;border:1px solid #333;padding:20px;border-radius:13px}
+.card strong{display:block;font-size:27px;color:#ffd400;margin-bottom:8px}
+section{display:none}
+section.active{display:block}
+input,textarea,select{width:100%;padding:13px;background:#202020;border:1px solid #444;color:white;border-radius:8px;margin:8px 0 15px}
+.action{margin-top:12px}
+.item{background:#202020;padding:15px;border-radius:9px;margin:10px 0}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">VITALITY AI.</div>
+<span>Plataforma de gestão</span>
+</header>
+<nav>
+<button class="active" onclick="show('inicio',this)">Início</button>
+<button onclick="show('clientes',this)">Clientes</button>
+<button onclick="show('empresas',this)">Empresas</button>
+<button onclick="show('sites',this)">Criar sites</button>
+<button onclick="show('projetos',this)">Projetos</button>
+</nav>
+<main>
+<section id="inicio" class="active">
+<h1>Bem-vindo à Vitality AI</h1>
+<p class="sub">Sua agência, potencializada por tecnologia.</p>
+<div class="cards">
+<div class="card"><strong id="totalClientes">0</strong>Clientes</div>
+<div class="card"><strong id="totalEmpresas">0</strong>Empresas</div>
+<div class="card"><strong id="totalProjetos">0</strong>Projetos</div>
+</div>
+<h2>Central de operações</h2>
+<p class="sub">Gerencie clientes, oportunidades e criação de sites.</p>
+</section>
+
+<section id="clientes">
+<h1>Clientes</h1>
+<p class="sub">Cadastre e organize seus clientes.</p>
+<input id="clienteNome" placeholder="Nome do cliente ou empresa">
+<input id="clienteTelefone" placeholder="Telefone / WhatsApp">
+<button onclick="add('clientes', 'clienteNome','clienteTelefone')">Cadastrar cliente</button>
+<div id="listaClientes"></div>
+</section>
+
+<section id="empresas">
+<h1>Prospecção de empresas</h1>
+<p class="sub">Organize oportunidades do Sul de Minas.</p>
+<input id="empresaNome" placeholder="Nome da empresa">
+<input id="empresaCidade" placeholder="Cidade">
+<input id="empresaTelefone" placeholder="Telefone">
+<button onclick="addEmpresa()">Salvar oportunidade</button>
+<div id="listaEmpresas"></div>
+</section>
+
+<section id="sites">
+<h1>Gerador de sites</h1>
+<p class="sub">Prepare a descrição de um novo projeto.</p>
+<input id="siteNome" placeholder="Nome da empresa">
+<select id="siteTipo">
+<option>Restaurante</option><option>Cafeteria</option><option>Loja</option><option>Mercado</option><option>Barbearia</option><option>Outro</option>
+</select>
+<textarea id="siteDescricao" placeholder="Descreva como deve ser o site"></textarea>
+<button onclick="prepararSite()">Preparar projeto</button>
+<div id="resultadoSite"></div>
+</section>
+
+<section id="projetos">
+<h1>Projetos</h1>
+<p class="sub">Acompanhe os projetos da agência.</p>
+<div id="listaProjetos"></div>
+</section>
+</main>
+<script>
+let dados={clientes:[],empresas:[],projetos:[]};
+function salvar(){localStorage.setItem('vitality',JSON.stringify(dados));render()}
+function render(){
+totalClientes.textContent=dados.clientes.length;
+totalEmpresas.textContent=dados.empresas.length;
+totalProjetos.textContent=dados.projetos.length;
+listaClientes.innerHTML=dados.clientes.map(x=>`<div class="item">${x.nome} — ${x.telefone}</div>`).join('');
+listaEmpresas.innerHTML=dados.empresas.map(x=>`<div class="item">${x.nome} — ${x.cidade} — ${x.telefone}</div>`).join('');
+listaProjetos.innerHTML=dados.projetos.map(x=>`<div class="item"><b>${x.nome}</b><p>${x.tipo}</p><p>${x.descricao}</p></div>`).join('');
+}
+function show(id,btn){
+document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+btn.classList.add('active');
+}
+function add(tipo,nome,telefone){
+let n=document.getElementById(nome),t=document.getElementById(telefone);
+if(!n.value.trim())return alert('Informe o nome.');
+dados[tipo].push({nome:n.value,telefone:t.value});
+n.value='';t.value='';salvar();
+}
+function addEmpresa(){
+let nome=empresaNome.value,cidade=empresaCidade.value,telefone=empresaTelefone.value;
+if(!nome.trim())return alert('Informe o nome.');
+dados.empresas.push({nome,cidade,telefone});
+empresaNome.value=empresaCidade.value=empresaTelefone.value='';
+salvar();
+}
+function prepararSite(){
+let nome=siteNome.value,tipo=siteTipo.value,descricao=siteDescricao.value;
+if(!nome.trim())return alert('Informe o nome da empresa.');
+dados.projetos.push({nome,tipo,descricao});
+resultadoSite.innerHTML='<div class="item">Projeto salvo! A geração com IA será conectada na próxima etapa.</div>';
+salvar();
+}
+try{dados=JSON.parse(localStorage.getItem('vitality'))||dados}catch(e){}
+render();
+</script>
+</body>
+</html>
